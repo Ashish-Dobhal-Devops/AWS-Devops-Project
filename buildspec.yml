@@ -1,0 +1,29 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DOCKER_USERNAME: flask-app-docker-username
+    DOCKER_PASSWORD: flask-app-docker-password
+    DOCKER_URL: flask-app-docker-URL
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+  pre_build:
+    commands:
+      - echo "Installing dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+  build:
+    commands:
+      - echo "Running tests..."
+      - echo "Building Docker image..."
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "$DOCKER_URL"
+      - docker build -t "$DOCKER_URL/$DOCKER_USERNAME/python-flask-app-aws-devops:latest" .
+      - docker push "$DOCKER_URL/$DOCKER_USERNAME/python-flask-app-aws-devops:latest"
+  post_build:
+    commands:
+      - echo "Build completed successfully!"
+artifacts:
+  files: '**/*'
+
